@@ -7,8 +7,8 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>TITLE</title>
-        <meta name="description" content="description" />
+        <title>Implicit Surface Renderer</title>
+        <meta name="description" content="Implicit Surface Renderer" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
