@@ -1,6 +1,3 @@
-#version 300 es
-precision mediump float;
-
 uniform vec2 resolution;
 uniform float time;
 uniform sampler2D buffer_A;
