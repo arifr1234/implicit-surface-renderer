@@ -5,7 +5,7 @@ out vec4 out_color;
 
 uniform sampler2D buffer_A;
 
-#define PI 3.14
+#define PI 3.14159265359
 
 void main() {
   vec2 uv = (gl_FragCoord.xy - resolution / 2.) / min(resolution.x, resolution.y);
