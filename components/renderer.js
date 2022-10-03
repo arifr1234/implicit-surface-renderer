@@ -8,6 +8,7 @@ import fragment_shader_header from "../shaders/header.glsl";
 import auto_diff_funcs from "../shaders/auto_diff.glsl";
 import buffer_A_fragment_shader from "../shaders/buffer_A_fs.glsl";
 import image_fragment_shader from "../shaders/image_fs.glsl";
+import seifert_surface from "../shaders/seifert_surface.glsl"
 
 function get_attachments(uniforms){
   return Object.fromEntries(Object.entries(uniforms).map(([key, value]) => [key, value.attachments[0]]));
@@ -55,7 +56,7 @@ export default class Renderer extends React.Component{
       throw Error(err);
     });
 
-    A.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, auto_diff_funcs, buffer_A_fragment_shader)], err => {
+    A.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, auto_diff_funcs, seifert_surface, buffer_A_fragment_shader)], err => {
       throw Error(err);
     });
 

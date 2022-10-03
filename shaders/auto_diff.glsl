@@ -1,5 +1,6 @@
 #define dual vec2
 #define dual2 mat2x2
+#define dual3 mat3x2
 #define dual4 mat4x2
 
 #define complex vec2
@@ -62,3 +63,5 @@ dual_complex Log(dual_complex z) {
 dual_complex Pow(dual_complex z, float n)        { return Exp(    n * Log(z)); }
 dual_complex Pow(dual_complex z, dual n)         { return Exp(Mul(n, Log(z))); }
 dual_complex Pow(dual_complex z, dual_complex n) { return Exp(Mul(n, Log(z))); }
+
+#define constant(x) vec2(x, 0)
