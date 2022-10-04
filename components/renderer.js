@@ -9,6 +9,7 @@ import auto_diff_funcs from "../shaders/auto_diff.glsl";
 import buffer_A_fragment_shader from "../shaders/buffer_A_fs.glsl";
 import image_fragment_shader from "../shaders/image_fs.glsl";
 import seifert_surface from "../shaders/seifert_surface.glsl"
+import scene_funcs from "../shaders/scene.glsl"
 
 function get_attachments(uniforms){
   return Object.fromEntries(Object.entries(uniforms).map(([key, value]) => [key, value.attachments[0]]));
@@ -52,11 +53,11 @@ export default class Renderer extends React.Component{
     const image = {};
     const A = {};
 
-    image.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, image_fragment_shader)], err => {
+    image.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, scene_funcs, auto_diff_funcs, seifert_surface, image_fragment_shader)], err => {
       throw Error(err);
     });
 
-    A.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, auto_diff_funcs, seifert_surface, buffer_A_fragment_shader)], err => {
+    A.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, scene_funcs, auto_diff_funcs, seifert_surface, buffer_A_fragment_shader)], err => {
       throw Error(err);
     });
 
@@ -76,6 +77,7 @@ export default class Renderer extends React.Component{
         const uniforms = {
             time: time * 0.001,
             resolution: resolution,
+            angles: [0., 0.],
         };
 
         gl.viewport(0, 0, resolution[0], resolution[1]);
