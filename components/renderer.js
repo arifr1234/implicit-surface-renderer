@@ -8,8 +8,8 @@ import fragment_shader_header from "../shaders/header.glsl";
 import auto_diff_funcs from "../shaders/auto_diff.glsl";
 import buffer_A_fragment_shader from "../shaders/buffer_A_fs.glsl";
 import image_fragment_shader from "../shaders/image_fs.glsl";
-import surface_function from "../shaders/seifert_surface.glsl"
-import scene_funcs from "../shaders/scene.glsl"
+import surface_function from "../shaders/surfaces/sphere.glsl";
+import scene_funcs from "../shaders/scene.glsl";
 
 function get_attachments(uniforms){
   return Object.fromEntries(Object.entries(uniforms).map(([key, value]) => [key, value.attachments[0]]));
