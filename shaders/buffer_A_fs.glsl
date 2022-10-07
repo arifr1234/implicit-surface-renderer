@@ -8,31 +8,50 @@ uniform sampler2D buffer_A;
 
 // ADAM
 #define b1 0.9
-#define b2 0.999;
+#define b2 0.999
+#define alpha 0.01
+// 0.001
 
-dual loss(dual r, dual t)
+dual sherable_loss(dual r)
 {
-  return Sq(r) + 0.05 * Sq(t);
+  return Sq(r) - Div(constant(1.), Sq(r) + constant(0.5)) + 2. * t;  // ADD SEPERATLY, THIS SOULDN'T PROPAGATE.
 }
 
-float loss_partial_derivative(vec3 p, float t, vec3 ray, R_params params)
+float d_sherable_loss_dt(vec3 p, vec3 ray, R_params params)
 {
   dual r = R(transpose(mat2x3(p, ray)), params);
 
-  return loss(r, dual(t, 1.)).y;
+  return sherable_loss(r).y;
 }
 
 void main() {
   scene_params scene = get_scene_params(gl_FragCoord.xy);
 
-  float t = texelFetch(buffer_A, ivec2(gl_FragCoord.xy), 0).x;
+  vec4 params = texelFetch(buffer_A, ivec2(gl_FragCoord.xy), 0);
+  float t = params.x;
+  float m = params.y;
+  float v = params.z;
+  float i = params.w;
 
-  for(int i = 0; i < 10; i++)
+  // TODO: Test this (i).
+  // TODO: Reset params.
+  // TODO: One iteration.
+
+  float initial_i = i;
+  for(; i < initial_i + 10.; i++)
   {
-    float d_loss_d_t = loss_partial_derivative(scene.camera + scene.ray * t, t, scene.ray, R_params(time));
+    float grad = d_sherable_loss_dt(scene.camera + scene.ray * t, scene.ray, R_params(time));
 
-    t -= 0.01 * d_loss_d_t;
+    m = b1 * m + (1. - b1) * grad;
+    v = b2 * v + (1. - b2) * sq(grad);
+    
+    float m_hat = m / (1. - pow(b1, i));
+    float v_hat = v / (1. - pow(b2, i));
+    
+    float delta = alpha * m_hat / (sqrt(v_hat) + 1e-8);
+
+    t -= delta;
   }
 
-  out_color = vec4(t, 0, 0, 0);
+  out_color = vec4(t, m, v, i);
 }
