@@ -8,7 +8,7 @@ import fragment_shader_header from "../shaders/header.glsl";
 import auto_diff_funcs from "../shaders/auto_diff.glsl";
 import buffer_A_fragment_shader from "../shaders/buffer_A_fs.glsl";
 import image_fragment_shader from "../shaders/image_fs.glsl";
-import surface_function from "../shaders/surfaces/sphere.glsl";
+import surface_function from "../shaders/surfaces/torus.glsl";
 import scene_funcs from "../shaders/scene.glsl";
 
 function get_attachments(uniforms){
@@ -26,10 +26,29 @@ export default class Renderer extends React.Component{
     this.canvas_ref = React.createRef();
     this.width = props.width;
     this.height = props.height;
+
+    this.angles = [0, 0];
   }
 
   render() {
-    return <canvas ref={this.canvas_ref} style={{width: this.width, height: this.height}}></canvas>
+    const handleMouseMove = event => {
+      if(self.is_mouse_down)
+      {
+        this.angles = [
+          this.angles[0] + 2.*Math.PI * event.movementX / this.resolution[0],
+          this.angles[1] - 2.*Math.PI * event.movementY / this.resolution[1],
+        ];
+      }
+    };
+
+    const handleMouseDown = event => {
+      self.is_mouse_down = true;
+    }
+    const handleMouseUp = event => {
+      self.is_mouse_down = false;
+    }
+
+    return <canvas ref={this.canvas_ref} onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} style={{width: this.width, height: this.height}}></canvas>
   }
 
   draw(gl, program, to, uniforms)
@@ -47,8 +66,8 @@ export default class Renderer extends React.Component{
     gl.getExtension('EXT_color_buffer_float');
 
     twgl.resizeCanvasToDisplaySize(gl.canvas);
-    const resolution = [gl.canvas.width, gl.canvas.height];
-    console.log(resolution);
+    this.resolution = [gl.canvas.width, gl.canvas.height];
+    console.log(this.resolution);
 
     const image = {};
     const A = {};
@@ -74,20 +93,24 @@ export default class Renderer extends React.Component{
     
 
     const render = (time) => {
-        const uniforms = {
-            time: time * 0.001,
-            resolution: resolution,
-            angles: [0., 0.],
-        };
+      if (this.start === undefined) {
+        this.start = time;
+      }    
 
-        gl.viewport(0, 0, resolution[0], resolution[1]);
-    
-        this.draw(gl, A.program,     A.out_buffer, {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
-        this.draw(gl, image.program, null,         {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
+      const uniforms = {
+        time: (time - this.start) * 0.001,
+        resolution: this.resolution,
+        angles: this.angles,
+      };
 
-        [A.out_buffer, A.in_buffer] = [A.in_buffer, A.out_buffer]
-    
-        requestAnimationFrame(render);
+      gl.viewport(0, 0, this.resolution[0], this.resolution[1]);
+  
+      this.draw(gl, A.program,     A.out_buffer, {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
+      this.draw(gl, image.program, null,         {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
+
+      [A.out_buffer, A.in_buffer] = [A.in_buffer, A.out_buffer]
+  
+      requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
   }
