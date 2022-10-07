@@ -19,6 +19,20 @@ function concat_shaders(...shaders){
   return shaders.join("\n");
 }
 
+const ADAM_PARAMS = {
+  alpha: 0.001,
+  b1: 0.9,
+  b2: 0.999
+}
+
+function defines(params){
+  return (
+    Object.entries(params)
+    .map(([key, value]) => `#define ${key} ${value}`)
+    .join("\n")
+  );
+}
+
 export default class Renderer extends React.Component{
   constructor(props) {
     super(props);
@@ -28,6 +42,9 @@ export default class Renderer extends React.Component{
     this.height = props.height;
 
     this.angles = [0, 0];
+
+    this.b1_pow_i = 1;
+    this.b2_pow_i = 1;
   }
 
   render() {
@@ -72,13 +89,38 @@ export default class Renderer extends React.Component{
     const image = {};
     const A = {};
 
-    image.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, scene_funcs, auto_diff_funcs, surface_function, image_fragment_shader)], err => {
-      throw Error(err);
-    });
+    image.program = twgl.createProgramInfo(gl, 
+      [
+        vertex_shader, 
+        concat_shaders(
+          fragment_shader_header, 
+          scene_funcs, 
+          auto_diff_funcs, 
+          surface_function, 
+          image_fragment_shader
+        )
+      ], 
+      err => {
+        throw Error(err);
+      }
+    );
 
-    A.program = twgl.createProgramInfo(gl, [vertex_shader, concat_shaders(fragment_shader_header, scene_funcs, auto_diff_funcs, surface_function, buffer_A_fragment_shader)], err => {
-      throw Error(err);
-    });
+    A.program = twgl.createProgramInfo(gl, 
+      [
+        vertex_shader, 
+        concat_shaders(
+          fragment_shader_header, 
+          scene_funcs, 
+          auto_diff_funcs, 
+          surface_function, 
+          defines(ADAM_PARAMS),
+          buffer_A_fragment_shader
+        )
+      ], 
+      err => {
+        throw Error(err);
+      }
+    );
 
     const attachments = [
       { format: gl.RGBA, internalFormat: gl.RGBA32F, type: gl.FLOAT, mag: gl.NEAREST, min: gl.NEAREST },
@@ -97,18 +139,26 @@ export default class Renderer extends React.Component{
         this.start = time;
       }    
 
+      this.b1_pow_i *= ADAM_PARAMS.b1;
+      this.b2_pow_i *= ADAM_PARAMS.b2;
+
       const uniforms = {
         time: (time - this.start) * 0.001,
         resolution: this.resolution,
         angles: this.angles,
+        m_hat_normalization: 1 - this.b1_pow_i,
+        v_hat_normalization: 1 - this.b2_pow_i
       };
 
       gl.viewport(0, 0, this.resolution[0], this.resolution[1]);
-  
-      this.draw(gl, A.program,     A.out_buffer, {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
-      this.draw(gl, image.program, null,         {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
 
-      [A.out_buffer, A.in_buffer] = [A.in_buffer, A.out_buffer]
+      for(var i = 0; i < 10; i ++)
+      {
+        this.draw(gl, A.program,     A.out_buffer, {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
+        this.draw(gl, image.program, null,         {...uniforms, ...get_attachments({buffer_A: A.in_buffer})});
+
+        [A.out_buffer, A.in_buffer] = [A.in_buffer, A.out_buffer]
+      }
   
       requestAnimationFrame(render);
     }
