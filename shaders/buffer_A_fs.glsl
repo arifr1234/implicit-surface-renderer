@@ -11,7 +11,12 @@ uniform sampler2D buffer_A;
 
 dual sherable_loss(dual r)
 {
-  return Sq(r) - Div(constant(1.), Sq(r) + constant(0.5));
+  return Sq(r);  // - Div(constant(1.), Sq(r) + constant(0.5));
+}
+
+dual t_penalty(dual t)
+{
+  return 2. * t;
 }
 
 float d_sherable_loss_dt(vec3 p, vec3 ray, R_params params)
@@ -19,11 +24,6 @@ float d_sherable_loss_dt(vec3 p, vec3 ray, R_params params)
   dual r = R(transpose(mat2x3(p, ray)), params);
 
   return sherable_loss(r).y;
-}
-
-dual t_penalty(dual t)
-{
-  return 2. * t;
 }
 
 float d_t_penalty_loss_dt(float t)
