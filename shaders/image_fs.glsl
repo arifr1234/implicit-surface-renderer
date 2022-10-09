@@ -20,7 +20,18 @@ vec4 R_gradient_and_value(vec3 p, R_params params)
 void main() {
   scene_params scene = get_scene_params(gl_FragCoord.xy);
 
-  float t = texelFetch(optimization_parameters, ivec2(gl_FragCoord.xy), 0).x;
+  ivec2 coord = ivec2(gl_FragCoord.xy);
+
+  float t = 0.;
+  float wrong_sampling = 0.;
+  for(int lod = 0; lod < min_points.length(); lod++)
+  {
+    vec2 v = texelFetch(optimization_parameters, min_points[lod] + coord, 0).xw;
+    t += v.x;
+    wrong_sampling += v.y;
+
+    coord /= 2;
+  }
 
   vec3 p = t * scene.ray + scene.camera;
 
@@ -34,9 +45,8 @@ void main() {
   float shade = (dot(gradient, -light) + 1.) / 2.;
 
   float is_zero = 1. - smoothstep(0., 1., r_value);
-  float is_nan = isnan(t) ? 0. : 1.;
 
-  color = shade * vec3(1., is_zero, is_nan);
+  color = shade * vec3(1., is_zero, wrong_sampling);
 
   out_color = vec4(color, 1.);
 }
