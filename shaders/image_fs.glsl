@@ -33,9 +33,10 @@ void main() {
   vec3 light = normalize(vec3(1, 2, 0));
   float shade = (dot(gradient, -light) + 1.) / 2.;
 
-  float is_zero = smoothstep(-10., 10., r_value); //  1. - smoothstep(0., 1., r_value);
+  float is_zero = 1. - smoothstep(0., 1., r_value);
+  float is_nan = isnan(t) ? 0. : 1.;
 
-  color = shade * vec3(1., is_zero, 1.);
+  color = shade * vec3(1., is_zero, is_nan);
 
   out_color = vec4(color, 1.);
 }
