@@ -117,6 +117,15 @@ export default class Renderer extends React.Component{
     const optimizer = {};
     const gradient = {};
 
+    const min_points_const_glsl = consts({[
+      `ivec2 min_points[${min_points.length}]`]: 
+      `ivec2[](${
+        min_points
+        .map(v => `ivec2(${v[0]}, ${v[1]})`)
+        .join(",")
+      })`
+    });
+
     image.program = twgl.createProgramInfo(gl, 
       [
         vertex_shader, 
@@ -125,6 +134,7 @@ export default class Renderer extends React.Component{
           scene_funcs, 
           auto_diff_funcs, 
           surface_function, 
+          min_points_const_glsl,
           image_fragment_shader
         )
       ], 
@@ -156,14 +166,7 @@ export default class Renderer extends React.Component{
           scene_funcs, 
           auto_diff_funcs, 
           surface_function, 
-          consts({[
-            `ivec2 min_points[${min_points.length}]`]: 
-            `ivec2[](${
-              min_points
-              .map(v => `ivec2(${v[0]}, ${v[1]})`)
-              .join(",")
-            })`
-          }),
+          min_points_const_glsl,
           gradient_calculator_fragment_shader
         )
       ], 
