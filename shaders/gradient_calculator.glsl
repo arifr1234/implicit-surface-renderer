@@ -25,7 +25,8 @@ void main() {
 
   for(int lod = 0; lod < min_points.length(); lod++)
   {
-    t += texelFetch(optimization_parameters, ivec2(min_points[lod]) + coord, 0).x;
+    vec2 v = texelFetch(optimization_parameters, ivec2(min_points[lod]) + coord, 0).xw;
+    t += v.x / (1. + v.y);  // TODO: remove
 
     coord /= 2;
   }

@@ -199,7 +199,9 @@ export default class Renderer extends React.Component{
     optimizer.out_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
 
     gradient.in_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
+    gl.clearBufferfv(gl.COLOR, 0, [0.0, -1.0, 0.0, 0.0]);
     gradient.out_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
+    gl.clearBufferfv(gl.COLOR, 0, [0.0, -1.0, 0.0, 0.0]);
 
     this.triangles_buffer_info = twgl.createBufferInfoFromArrays(gl, {
       position: [-1, -1, 0, 1, -1, 0, -1, 1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0],

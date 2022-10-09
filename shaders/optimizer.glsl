@@ -8,7 +8,7 @@ uniform sampler2D optimization_parameters;
 
 dual t_penalty(dual t)
 {
-  return 0. * t;
+  return 0.2 * t;
 }
 
 float d_t_penalty_loss_dt(float t)
@@ -17,8 +17,13 @@ float d_t_penalty_loss_dt(float t)
 }
 
 void main() {
-  // TODO: simple condition to prevent unnesecery executions.
-  // a solution may be reading some value from gradient.
+  vec2 shareable_grad = texelFetch(gradient, ivec2(gl_FragCoord.xy), 0).xy;
+
+  if(shareable_grad.y == -1.)
+  {
+    out_color = vec4(0, 0, 0, -1);
+    return;
+  }
 
   vec4 params = texelFetch(optimization_parameters, ivec2(gl_FragCoord.xy), 0);
   float t = params.x;
@@ -26,7 +31,7 @@ void main() {
   float v = params.z;
 
   float grad = (
-    texelFetch(gradient, ivec2(gl_FragCoord.xy), 0).x + 
+    shareable_grad.x + 
     d_t_penalty_loss_dt(t)
   );
 
