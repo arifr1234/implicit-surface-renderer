@@ -4,16 +4,16 @@ out vec4 out_color;
 
 uniform sampler2D optimization_parameters;
 
-dual sherable_loss(dual r)
+dual shareable_loss(dual r)
 {
   return Sq(r);  // - Div(constant(1.), Sq(r) + constant(0.5));
 }
 
-float d_sherable_loss_dt(vec3 p, vec3 ray, R_params params)
+float d_shareable_loss_dt(vec3 p, vec3 ray, R_params params)
 {
   dual r = R(transpose(mat2x3(p, ray)), params);
 
-  return sherable_loss(r).y;
+  return shareable_loss(r).y;
 }
 
 void main() {
@@ -31,7 +31,7 @@ void main() {
   }
 
   float grad = (
-    d_sherable_loss_dt(scene.camera + scene.ray * t, scene.ray, R_params(time))
+    d_shareable_loss_dt(scene.camera + scene.ray * t, scene.ray, R_params(time))
   );
 
   out_color = vec4(grad, 0., 0., 0.);  // The value of R can be calculated easily
