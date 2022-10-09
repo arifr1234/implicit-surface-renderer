@@ -1,29 +1,14 @@
-uniform float time;
-
 uniform float m_hat_normalization;
 uniform float v_hat_normalization;
 
 out vec4 out_color;
 
-uniform sampler2D buffer_A;
-
-#define PI 3.14159265359
-
-dual sherable_loss(dual r)
-{
-  return Sq(r);  // - Div(constant(1.), Sq(r) + constant(0.5));
-}
+uniform sampler2D gradient;
+uniform sampler2D optimization_parameters;
 
 dual t_penalty(dual t)
 {
-  return 2. * t;
-}
-
-float d_sherable_loss_dt(vec3 p, vec3 ray, R_params params)
-{
-  dual r = R(transpose(mat2x3(p, ray)), params);
-
-  return sherable_loss(r).y;
+  return 0. * t;
 }
 
 float d_t_penalty_loss_dt(float t)
@@ -32,15 +17,16 @@ float d_t_penalty_loss_dt(float t)
 }
 
 void main() {
-  scene_params scene = get_scene_params(gl_FragCoord.xy);
+  // TODO: simple condition to prevent unnesecery executions.
+  // a solution may be reading some value from gradient.
 
-  vec4 params = texelFetch(buffer_A, ivec2(gl_FragCoord.xy), 0);
+  vec4 params = texelFetch(optimization_parameters, ivec2(gl_FragCoord.xy), 0);
   float t = params.x;
   float m = params.y;
   float v = params.z;
 
   float grad = (
-    d_sherable_loss_dt(scene.camera + scene.ray * t, scene.ray, R_params(time)) + 
+    texelFetch(gradient, ivec2(gl_FragCoord.xy), 0).x + 
     d_t_penalty_loss_dt(t)
   );
 
