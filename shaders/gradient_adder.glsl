@@ -17,20 +17,20 @@ void main() {
 
     coord += previous_min_point;
 
-    vec4 res = texelFetch(gradient, coord, 0);
+    float grad = texelFetch(gradient, coord, 0).x;
 
     if(x_in_range)
     {
-        res += texelFetch(gradient, coord + ivec2(1, 0), 0);
+        grad += texelFetch(gradient, coord + ivec2(1, 0), 0).x;
     }
     if(y_in_range)
     {
-        res += texelFetch(gradient, coord + ivec2(0, 1), 0);
+        grad += texelFetch(gradient, coord + ivec2(0, 1), 0).x;
     }
     if(x_in_range && y_in_range)
     {
-        res += texelFetch(gradient, coord + ivec2(1, 1), 0);
+        grad += texelFetch(gradient, coord + ivec2(1, 1), 0).x;
     }
 
-    out_color = res;
+    out_color = vec4(grad, 0., 0., 0.);
 }
