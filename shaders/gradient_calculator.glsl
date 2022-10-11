@@ -34,5 +34,5 @@ void main() {
     d_shareable_loss_dt(scene.camera + scene.ray * t, scene.ray, R_params(time))
   );
 
-  out_color = vec4(grad, 0., 0., 0.);  // The value of R can be calculated easily
+  out_color = vec4(grad, t, 0., 0.);  // The value of R can be calculated easily
 }

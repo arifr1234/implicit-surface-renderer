@@ -22,7 +22,7 @@ function concat_shaders(...shaders){
 }
 
 const ADAM_PARAMS = {
-  alpha: "1.0",
+  alpha: "0.01",
   b1: 0.9,
   b2: 0.999
 }
@@ -202,9 +202,9 @@ export default class Renderer extends React.Component{
     optimizer.out_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
 
     gradient.in_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
-    gl.clearBufferfv(gl.COLOR, 0, [0.0, -1.0, 0.0, 0.0]);
+    gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, -1.0]);
     gradient.out_buffer = twgl.createFramebufferInfo(gl, attachments, gradient_resolution[0], gradient_resolution[1]);
-    gl.clearBufferfv(gl.COLOR, 0, [0.0, -1.0, 0.0, 0.0]);
+    gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, -1.0]);
 
     this.triangles_buffer_info = twgl.createBufferInfoFromArrays(gl, {
       position: [-1, -1, 0, 1, -1, 0, -1, 1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0],
@@ -269,7 +269,7 @@ export default class Renderer extends React.Component{
             })
           }
         );
-        [gradient.out_buffer, gradient.in_buffer] = [gradient.in_buffer, gradient.out_buffer]
+      [gradient.out_buffer, gradient.in_buffer] = [gradient.in_buffer, gradient.out_buffer]
       });
     }
     
@@ -295,7 +295,7 @@ export default class Renderer extends React.Component{
         gl,
         image.program,
         null,
-        {...uniforms, ...get_attachments({optimization_parameters: optimizer.in_buffer})}
+        {...uniforms, ...get_attachments({gradient: gradient.in_buffer})}
       );
   
       requestAnimationFrame(self.frame);

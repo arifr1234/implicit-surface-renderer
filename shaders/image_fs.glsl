@@ -1,5 +1,5 @@
 uniform float time;
-uniform sampler2D optimization_parameters;
+uniform sampler2D gradient;
 
 out vec4 out_color;
 
@@ -22,16 +22,9 @@ void main() {
 
   ivec2 coord = ivec2(gl_FragCoord.xy);
 
-  float t = 0.;
-  float wrong_sampling = 0.;
-  for(int lod = 0; lod < min_points.length(); lod++)
-  {
-    vec2 v = texelFetch(optimization_parameters, min_points[lod] + coord, 0).xw;
-    t += v.x;
-    wrong_sampling += v.y;
-
-    coord /= 2;
-  }
+  vec2 v = texelFetch(gradient, coord, 0).yw;
+  float t = v.x;
+  float wrong_sampling = v.y;
 
   vec3 p = t * scene.ray + scene.camera;
 
@@ -46,7 +39,7 @@ void main() {
 
   float is_zero = 1. - smoothstep(0., 1., r_value);
 
-  color = shade * vec3(1., is_zero, wrong_sampling);
+  color = shade * vec3(1., is_zero, abs(wrong_sampling));
 
   out_color = vec4(color, 1.);
 }
