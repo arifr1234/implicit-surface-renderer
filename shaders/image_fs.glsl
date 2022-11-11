@@ -1,5 +1,5 @@
 uniform float time;
-uniform sampler2D gradient;
+uniform sampler2D even_gradient;
 
 out vec4 out_color;
 
@@ -22,9 +22,9 @@ void main() {
 
   ivec2 coord = ivec2(gl_FragCoord.xy);
 
-  vec2 v = texelFetch(gradient, coord, 0).yw;
-  float t = v.x;
-  float wrong_sampling = v.y;
+  vec4 v = texelFetch(even_gradient, coord, 0);
+  float t = v.y;
+  float wrong_sampling = v.w;
 
   vec3 p = t * scene.ray + scene.camera;
 
@@ -40,6 +40,8 @@ void main() {
   float is_zero = 1. - smoothstep(0., 1., r_value);
 
   color = shade * vec3(1., is_zero, abs(wrong_sampling));
+
+  // color = vec3(t == 0. ? 1. : 0., 0., 0.);
 
   out_color = vec4(color, 1.);
 }

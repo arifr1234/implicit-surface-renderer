@@ -25,7 +25,7 @@ void main() {
 
   for(int lod = 0; lod < min_points.length(); lod++)
   {
-    t += texelFetch(optimization_parameters, ivec2(min_points[lod]) + coord, 0).x;
+    t += texelFetch(optimization_parameters, min_points[lod] + coord, 0).x;
 
     coord /= 2;
   }
